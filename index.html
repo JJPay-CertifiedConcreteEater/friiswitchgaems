@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>friiswitchgaems.is-a.dev: A site focused on giving you the best roms for your switch gameplay!</title>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #f9f9f9; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; overflow: hidden; }
+
+        #captcha-container {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #fff; border: 1px solid #d3d3d3; border-radius: 3px;
+            width: 300px; height: 74px; display: flex; align-items: center; padding: 0 10px;
+            box-shadow: 0 0 4px rgba(0,0,0,0.1); z-index: 1000; cursor: pointer;
+        }
+        #checkbox { width: 24px; height: 24px; border: 2px solid #c1c1c1; border-radius: 2px; margin-right: 15px; background: #fff; }
+        #label { color: #555; font-size: 14px; flex-grow: 1; user-select: none; }
+        #logo { width: 32px; height: 32px; background: url('https://www.gstatic.com') no-repeat; background-size: contain; }
+
+        #rick-grid { display: none; flex-wrap: wrap; height: 100vh; width: 100vw; background: black; }
+        img { width: calc(100vw / 9); height: calc(100vh / 8); object-fit: cover; }
+    </style>
+</head>
+<body>
+
+    <div id="captcha-container" onclick="startPrank()">
+        <div id="checkbox"></div>
+        <div id="label">I'm not a robot</div>
+        <div id="logo"></div>
+    </div>
+
+    <div id="rick-grid">
+        <script>
+            const gifUrl = "https://media.tenor.com";
+            for (let i = 0; i < 69; i++) {
+                document.write(`<img src="${gifUrl}">`);
+            }
+        </script>
+    </div>
+
+    <audio id="rick-audio" loop>
+        <source src="https://www.myinstants.com" type="audio/mpeg">
+    </audio>
+
+    <script>
+        function startPrank() {
+            document.getElementById('checkbox').style.background = "url('https://upload.wikimedia.org') no-repeat center";
+            document.getElementById('checkbox').style.backgroundSize = "contain";
+            
+            setTimeout(() => {
+                document.getElementById('captcha-container').style.display = 'none';
+                document.getElementById('rick-grid').style.display = 'flex';
+                document.getElementById('rick-audio').play();
+            }, 300);
+        }
+    </script>
+</body>
+</html>
