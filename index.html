@@ -30,9 +30,29 @@
   #progress-fill { background: #4285f4; height: 100%; width: 0%; transition: width 0.1s linear; }
   #status-text { font-size: 12px; color: #777; margin-top: 8px; font-style: italic; }
   
-  #pre-roll-vid, #rick-grid { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 1000; }
-  #rick-grid { flex-wrap: wrap; overflow: hidden; align-content: flex-start; display: flex; }
-  .rick-gif { width: calc(100vw / 9); height: calc(100vh / 8); object-fit: cover; }
+  #pre-roll-vid { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 1000; }
+  
+  #rick-grid { 
+    display: none; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 100vh; 
+    background: black; 
+    z-index: 1000; 
+    flex-wrap: wrap; 
+    overflow: hidden; 
+    align-content: flex-start; 
+    display: flex; 
+  }
+
+  .rick-gif { 
+    width: 11.11vw; 
+    height: 12.5vh; 
+    object-fit: cover; 
+    display: block;
+  }
 </style>
 </head>
 <body>
@@ -49,7 +69,7 @@
   </div>
 </div>
 
-<video id="pre-roll-vid" style="display:none;">
+<video id="pre-roll-vid">
   <source src="202603151152.mp4" type="video/mp4" />
 </video>
 
@@ -73,9 +93,7 @@
   }
 
   function startVerification() {
-    const input = document.getElementById('favorite-input');
     if (prankStarted) return;
-
     document.getElementById('question-box').style.display = 'none';
     startLoading();
   }
@@ -106,8 +124,8 @@
       status.innerText = "Verification failed! Sending to troubleshooting...";
       
       setTimeout(() => {
-        status.style.color = "#777";
-        status.innerText = "The site is eating a sandwich, please wait until it finishes...";
+        status.style.color = "blue";
+        status.innerText = "The site is eating a sandwich, please wait until it finishes... it's yummy too.";
         
         setTimeout(() => {
           status.style.color = "green";
