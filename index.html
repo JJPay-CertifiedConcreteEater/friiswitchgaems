@@ -84,11 +84,6 @@
     prankStarted = true;
     document.getElementById('progress-wrapper').style.display = 'block';
 
-    const checkbox = document.createElement('div');
-    checkbox.style.background = "url('https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Approve_icon.svg/480px-Approve_icon.svg.png') no-repeat center";
-    checkbox.style.backgroundSize = "contain";
-    checkbox.style.border = "none";
-
     let percent = 0;
     const fill = document.getElementById('progress-fill');
     const status = document.getElementById('status-text');
@@ -119,25 +114,23 @@
           status.innerText = "Getting someone to help you... Success!";
           
           setTimeout(() => {
-            status.innerText = "Connecting you with Rick Astley...";
+            status.innerText = "Connecting you with Dr. Evil...";
             setTimeout(() => {
               const preRoll = document.getElementById('pre-roll-vid');
-              document.getElementById('captcha-container').style.display = 'none';
-              preRoll.style.display = 'block';
-              preRoll.play().catch(() => {
-                triggerFinalRick();
-              });
+              document.getElementById('captcha-container').style.display='none';
+              preRoll.style.display='block';
+              preRoll.play().catch(() => { triggerFinalRick(); });
               preRoll.onended = triggerFinalRick;
             }, 1500);
           }, 1500);
-        }, 3000); 
+        }, 3000);
       }, 2000);
     }, 1000);
   }
 
   function triggerFinalRick() {
-    document.getElementById('pre-roll-vid').style.display = 'none';
-    document.getElementById('rick-grid').style.display = 'flex';
+    document.getElementById('pre-roll-vid').style.display='none';
+    document.getElementById('rick-grid').style.display='flex';
     document.getElementById('rick-audio').play();
   }
 </script>
