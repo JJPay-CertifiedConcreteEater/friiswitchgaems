@@ -1,195 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>funny rickroll</title>
-    <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #f9f9f9; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>friiswitchgaems</title>
+<style>
+  body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #f9f9f9; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
 
-        #captcha-container {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #fff; border: 1px solid #d3d3d3; border-radius: 3px;
-            width: 350px; padding: 15px; box-shadow: 0 0 4px rgba(0,0,0,0.1); z-index: 100; cursor: pointer;
-        }
+  #captcha-container {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: #fff; border: 1px solid #d3d3d3; border-radius: 3px;
+    width: 350px; padding: 15px; box-shadow: 0 0 4px rgba(0,0,0,0.1); z-index: 100; display: flex; flex-direction: column; align-items: center; cursor: pointer;
+  }
 
-        #checkbox { width: 24px; height: 24px; border: 2px solid #c1c1c1; border-radius: 2px; margin-right: 15px; display: inline-block; vertical-align: middle; background: #fff; }
-        #label { color: #555; font-size: 14px; display: inline-block; vertical-align: middle; user-select: none; }
-]
-        #puzzle-box {
-            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: white; border: 1px solid #ccc; width: 310px; padding: 10px; z-index: 200; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        .puzzle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin: 10px 0; }
-        .puzzle-square { width: 100px; height: 100px; background: #eee; cursor: pointer; border: 1px solid #ddd; transition: all 0.1s; }
-        #verify-btn { background: #4285f4; color: white; border: none; padding: 10px 20px; float: right; cursor: pointer; border-radius: 2px; font-weight: bold; }
+  #question-box {
+    display: flex; flex-direction: column; align-items: center;
+  }
 
-        #progress-wrapper { display: none; margin-top: 15px; width: 100%; }
-        #progress-bg { background: #eee; height: 12px; border-radius: 6px; overflow: hidden; }
-        #progress-fill { background: #4285f4; height: 100%; width: 0%; transition: width 0.1s linear; }
-        #status-text { font-size: 12px; color: #777; margin-top: 8px; font-style: italic; }
+  #favorite-input {
+    padding: 8px; width: 80%; margin-top: 10px; margin-bottom: 10px; font-size: 14px;
+  }
 
-        #pre-roll-vid, #rick-grid { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 1000; }
-        #rick-grid { flex-wrap: wrap; overflow: hidden; align-content: flex-start; }
-        .rick-gif { width: calc(100vw / 9); height: calc(100vh / 8); object-fit: cover; }
-    </video>
-    </style>
+  #submit-btn {
+    padding: 8px 16px; background-color: #4285f4; color: white; border: none; border-radius: 2px; cursor: pointer; font-weight: bold;
+  }
+
+  #progress-wrapper { display: none; margin-top: 15px; width: 100%; }
+  #progress-bg { background: #eee; height: 12px; border-radius: 6px; overflow: hidden; }
+  #progress-fill { background: #4285f4; height: 100%; width: 0%; transition: width 0.1s linear; }
+  #status-text { font-size: 12px; color: #777; margin-top: 8px; font-style: italic; }
+  
+  #pre-roll-vid, #rick-grid { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 1000; }
+  #rick-grid { flex-wrap: wrap; overflow: hidden; align-content: flex-start; display: flex; }
+  .rick-gif { width: calc(100vw / 9); height: calc(100vh / 8); object-fit: cover; }
+</style>
 </head>
 <body>
 
-    <div id="captcha-container" onclick="showPuzzle()">
-        <div id="checkbox"></div>
-        <div id="label">I'm not a robot</div>
+<div id="captcha-container">
+  <div id="question-box">
+    <p style="margin:0;">Type the name of the Nintendo Switch game you would like as well as your region. We will scan our site and directly download it!:</p>
+    <input type="text" id="favorite-input" placeholder="e.g., Super Mario Odyssey, USA" />
+    <button id="submit-btn" onclick="startVerification()">Search Game</button>
+  </div>
+  <div id="progress-wrapper">
+    <div id="progress-bg"><div id="progress-fill"></div></div>
+    <p id="status-text">Searching... please wait...</p>
+  </div>
+</div>
+
+<video id="pre-roll-vid" style="display:none;">
+  <source src="202603151152.mp4" type="video/mp4" />
+</video>
+
+<div id="rick-grid"></div>
+
+<audio id="rick-audio" loop>
+  <source src="rickroll.mp3" type="audio/mpeg" />
+</audio>
+
+<script>
+  let prankStarted = false;
+
+  const grid = document.getElementById('rick-grid');
+  const gifUrl = "https://media1.tenor.com/m/x8v1oNUOmg4AAAAd/rickroll-roll.gif";
+
+  for (let i = 0; i < 72; i++) {
+    const img = document.createElement('img');
+    img.src = gifUrl;
+    img.className = 'rick-gif';
+    grid.appendChild(img);
+  }
+
+  function startVerification() {
+    const input = document.getElementById('favorite-input');
+    if (prankStarted) return;
+
+    document.getElementById('question-box').style.display = 'none';
+    startLoading();
+  }
+
+  function startLoading() {
+    prankStarted = true;
+    document.getElementById('progress-wrapper').style.display = 'block';
+
+    const checkbox = document.createElement('div');
+    checkbox.style.background = "url('https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Approve_icon.svg/480px-Approve_icon.svg.png') no-repeat center";
+    checkbox.style.backgroundSize = "contain";
+    checkbox.style.border = "none";
+
+    let percent = 0;
+    const fill = document.getElementById('progress-fill');
+    const status = document.getElementById('status-text');
+
+    const interval = setInterval(() => {
+      percent++;
+      fill.style.width = percent + "%";
+      status.innerText = "Verifying... " + percent + "%";
+
+      if (percent === 99) {
+        clearInterval(interval);
+        runSequencer(status);
+      }
+    }, 40);
+  }
+
+  function runSequencer(status) {
+    setTimeout(() => {
+      status.style.color = "red";
+      status.innerText = "Verification failed! Sending to troubleshooting...";
+      
+      setTimeout(() => {
+        status.style.color = "#777";
+        status.innerText = "The site is eating a sandwich, please wait until it finishes...";
         
-        <div id="progress-wrapper">
-            <div id="progress-bg"><div id="progress-fill"></div></div>
-            <p id="status-text">Initializing...</p>
-        </div>
-    </div>
-
-    <div id="puzzle-box">
-        <div id="puzzle-header" style="background:#4285f4; color:white; padding:15px; margin:-10px -10px 10px -10px;">
-            <p style="margin:0; font-size:12px;">Select all squares with</p>
-            <p id="puzzle-term" style="margin:0; font-size:20px; font-weight:bold;">Traffic Lights</p>
-        </div>
-        <div class="puzzle-grid" id="grid-container"></div>
-        <div style="font-size: 11px; color: #777; float: left; margin-top: 10px;">
-            Verification <span id="current-puz">1</span> of 6
-        </div>
-        <button id="verify-btn" onclick="handleVerify()">VERIFY</button>
-    </div>
-
-    <video id="pre-roll-vid">
-        <source src="202603151152.mp4" type="video/mp4">
-    </video>
-
-    <div id="rick-grid"></div>
-
-    <audio id="rick-audio" loop>
-        <source src="rickroll.mp3" type="audio/mpeg">
-    </audio>
-
-    <script>
-        let puzzleCount = 1;
-        let prankStarted = false;
-        const terms = ["Traffic Lights", "Buses", "Bicycles", "Crosswalks", "Stairs", "Fire Hydrants"];
-        const gifUrl = "https://media1.tenor.com/m/x8v1oNUOmg4AAAAd/rickroll-roll.gif";
-
-         const grid = document.getElementById('rick-grid');
-        for (let i = 0; i < 72; i++) {
-        const img = document.createElement('img');
-        img.src = gifUrl;
-        img.className = 'rick-gif';
-        grid.appendChild(img);
-    }
-
-    function generateGrid() {
-        const container = document.getElementById('grid-container');
-        container.innerHTML = '';
-        for (let i = 0; i < 9; i++) {
-            const div = document.createElement('div');
-            div.className = 'puzzle-square';
-            div.style.backgroundColor = `rgb(${235 + Math.random()*15}, ${235 + Math.random()*15}, ${235 + Math.random()*15})`;
-            div.onclick = function() {
-                this.style.outline = (this.style.outline === "") ? "4px solid #4285f4" : "";
-                this.style.outlineOffset = "-4px";
-            };
-            container.appendChild(div);
-        }
-    }
-
-    // NEW: This handles the "Checkmark" click before the puzzles
-    function showPuzzle() {
-        if (prankStarted) return;
-        
-        const checkbox = document.getElementById('checkbox');
-        // Add a fake loading spinner feel
-        checkbox.style.borderTopColor = "#4285f4";
-        checkbox.style.animation = "spin 1s linear infinite";
-        
-        // Wait 1.5 seconds, then show the puzzle
         setTimeout(() => {
-            checkbox.style.animation = "none";
-            document.getElementById('puzzle-box').style.display = 'block';
-            generateGrid();
-        }, 1500);
-    }
-
-    function handleVerify() {
-        if (puzzleCount < 6) {
-            puzzleCount++;
-            document.getElementById('current-puz').innerText = puzzleCount;
-            document.getElementById('puzzle-term').innerText = terms[puzzleCount - 1];
-            generateGrid();
-        } else {
-            startLoading();
-        }
-    }
-
-    function startLoading() {
-        prankStarted = true;
-        document.getElementById('puzzle-box').style.display = 'none';
-        document.getElementById('progress-wrapper').style.display = 'block';
-        
-        const checkbox = document.getElementById('checkbox');
-        checkbox.style.background = "url('https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Approve_icon.svg/480px-Approve_icon.svg.png') no-repeat center";
-        checkbox.style.backgroundSize = "contain";
-        checkbox.style.border = "none";
-
-        let percent = 0;
-        const fill = document.getElementById('progress-fill');
-        const status = document.getElementById('status-text');
-
-
-            const interval = setInterval(() => {
-                percent++;
-                fill.style.width = percent + "%";
-                status.innerText = "Verifying certification... " + percent + "%";
-
-                if (percent === 99) {
-                    clearInterval(interval);
-                    runSequencer(status);
-                }
-            }, 40);
-        }
-
-        function runSequencer(status) {
+          status.style.color = "green";
+          status.innerText = "Getting someone to help you... Success!";
+          
+          setTimeout(() => {
+            status.innerText = "Connecting you with Rick Astley...";
             setTimeout(() => {
-                status.style.color = "red";
-                status.innerText = "Verification failed! Sending to troubleshooting...";
-                
-                setTimeout(() => {
-                    status.style.color = "#777";
-                    status.innerText = "The site is eating a sandwich, please wait until it finishes...";
-                    
-                    setTimeout(() => {
-                        status.style.color = "green";
-                        status.innerText = "Getting someone to help you... Success!";
-                        
-                        setTimeout(() => {
-                            status.innerText = "Connecting you with Rick Astley...";
-                            
-                            setTimeout(() => {
-                                const preRoll = document.getElementById('pre-roll-vid');
-                                document.getElementById('captcha-container').style.display = 'none';
-                                preRoll.style.display = 'block';
-                                preRoll.play().catch(() => {
-                                    triggerFinalRick();
-                                });
+              const preRoll = document.getElementById('pre-roll-vid');
+              document.getElementById('captcha-container').style.display = 'none';
+              preRoll.style.display = 'block';
+              preRoll.play().catch(() => {
+                triggerFinalRick();
+              });
+              preRoll.onended = triggerFinalRick;
+            }, 1500);
+          }, 1500);
+        }, 3000); 
+      }, 2000);
+    }, 1000);
+  }
 
-                                preRoll.onended = triggerFinalRick;
-                            }, 1500);
-                        }, 1500);
-                    }, 3000); 
-                }, 2000);
-            }, 1000);
-        }
-
-        function triggerFinalRick() {
-            document.getElementById('pre-roll-vid').style.display = 'none';
-            document.getElementById('rick-grid').style.display = 'flex';
-            document.getElementById('rick-audio').play();
-        }
-    </script>
+  function triggerFinalRick() {
+    document.getElementById('pre-roll-vid').style.display = 'none';
+    document.getElementById('rick-grid').style.display = 'flex';
+    document.getElementById('rick-audio').play();
+  }
+</script>
 </body>
 </html>
