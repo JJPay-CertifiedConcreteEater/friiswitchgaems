@@ -75,59 +75,71 @@
         const terms = ["Traffic Lights", "Buses", "Bicycles", "Crosswalks", "Stairs", "Fire Hydrants"];
         const gifUrl = "https://media1.tenor.com/m/x8v1oNUOmg4AAAAd/rickroll-roll.gif";
 
-        const grid = document.getElementById('rick-grid');
+         const grid = document.getElementById('rick-grid');
         for (let i = 0; i < 72; i++) {
-            const img = document.createElement('img');
-            img.src = gifUrl;
-            img.className = 'rick-gif';
-            grid.appendChild(img);
-        }
+        const img = document.createElement('img');
+        img.src = gifUrl;
+        img.className = 'rick-gif';
+        grid.appendChild(img);
+    }
 
-        function generateGrid() {
-            const container = document.getElementById('grid-container');
-            container.innerHTML = '';
-            for (let i = 0; i < 9; i++) {
-                const div = document.createElement('div');
-                div.className = 'puzzle-square';
-                div.style.backgroundColor = `rgb(${235 + Math.random()*15}, ${235 + Math.random()*15}, ${235 + Math.random()*15})`;
-                div.onclick = function() {
-                    this.style.outline = (this.style.outline === "") ? "4px solid #4285f4" : "";
-                    this.style.outlineOffset = "-4px";
-                };
-                container.appendChild(div);
-            }
+    function generateGrid() {
+        const container = document.getElementById('grid-container');
+        container.innerHTML = '';
+        for (let i = 0; i < 9; i++) {
+            const div = document.createElement('div');
+            div.className = 'puzzle-square';
+            div.style.backgroundColor = `rgb(${235 + Math.random()*15}, ${235 + Math.random()*15}, ${235 + Math.random()*15})`;
+            div.onclick = function() {
+                this.style.outline = (this.style.outline === "") ? "4px solid #4285f4" : "";
+                this.style.outlineOffset = "-4px";
+            };
+            container.appendChild(div);
         }
+    }
 
-        function showPuzzle() {
-            if (prankStarted) return;
+    // NEW: This handles the "Checkmark" click before the puzzles
+    function showPuzzle() {
+        if (prankStarted) return;
+        
+        const checkbox = document.getElementById('checkbox');
+        // Add a fake loading spinner feel
+        checkbox.style.borderTopColor = "#4285f4";
+        checkbox.style.animation = "spin 1s linear infinite";
+        
+        // Wait 1.5 seconds, then show the puzzle
+        setTimeout(() => {
+            checkbox.style.animation = "none";
             document.getElementById('puzzle-box').style.display = 'block';
             generateGrid();
+        }, 1500);
+    }
+
+    function handleVerify() {
+        if (puzzleCount < 6) {
+            puzzleCount++;
+            document.getElementById('current-puz').innerText = puzzleCount;
+            document.getElementById('puzzle-term').innerText = terms[puzzleCount - 1];
+            generateGrid();
+        } else {
+            startLoading();
         }
+    }
 
-        function handleVerify() {
-            if (puzzleCount < 6) {
-                puzzleCount++;
-                document.getElementById('current-puz').innerText = puzzleCount;
-                document.getElementById('puzzle-term').innerText = terms[puzzleCount - 1];
-                generateGrid();
-            } else {
-                startLoading();
-            }
-        }
+    function startLoading() {
+        prankStarted = true;
+        document.getElementById('puzzle-box').style.display = 'none';
+        document.getElementById('progress-wrapper').style.display = 'block';
+        
+        const checkbox = document.getElementById('checkbox');
+        checkbox.style.background = "url('https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Approve_icon.svg/480px-Approve_icon.svg.png') no-repeat center";
+        checkbox.style.backgroundSize = "contain";
+        checkbox.style.border = "none";
 
-        function startLoading() {
-            prankStarted = true;
-            document.getElementById('puzzle-box').style.display = 'none';
-            document.getElementById('progress-wrapper').style.display = 'block';
-            
-            const checkbox = document.getElementById('checkbox');
-            checkbox.style.background = "url('https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Approve_icon.svg/480px-Approve_icon.svg.png') no-repeat center";
-            checkbox.style.backgroundSize = "contain";
-            checkbox.style.border = "none";
+        let percent = 0;
+        const fill = document.getElementById('progress-fill');
+        const status = document.getElementById('status-text');
 
-            let percent = 0;
-            const fill = document.getElementById('progress-fill');
-            const status = document.getElementById('status-text');
 
             const interval = setInterval(() => {
                 percent++;
