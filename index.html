@@ -3,115 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>friiswitchgaems!</title>
+    <title>friiswitchgaems</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #f9f9f9; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; overflow: hidden; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #f9f9f9; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
 
         #captcha-container {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: #fff; border: 1px solid #d3d3d3; border-radius: 3px;
-            width: 350px; min-height: 74px; display: flex; flex-direction: column; justify-content: center; padding: 15px;
-            box-shadow: 0 0 4px rgba(0,0,0,0.1); z-index: 1000; cursor: pointer;
+            width: 350px; padding: 15px; box-shadow: 0 0 4px rgba(0,0,0,0.1); z-index: 100; cursor: pointer;
         }
 
-        .row { display: flex; align-items: center; width: 100%; }
+        #checkbox { width: 24px; height: 24px; border: 2px solid #c1c1c1; border-radius: 2px; margin-right: 15px; display: inline-block; vertical-align: middle; background: #fff; }
+        #label { color: #555; font-size: 14px; display: inline-block; vertical-align: middle; user-select: none; }
+]
+        #puzzle-box {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; border: 1px solid #ccc; width: 310px; padding: 10px; z-index: 200; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .puzzle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin: 10px 0; }
+        .puzzle-square { width: 100px; height: 100px; background: #eee; cursor: pointer; border: 1px solid #ddd; transition: all 0.1s; }
+        #verify-btn { background: #4285f4; color: white; border: none; padding: 10px 20px; float: right; cursor: pointer; border-radius: 2px; font-weight: bold; }
 
-        #checkbox { width: 24px; height: 24px; border: 2px solid #c1c1c1; border-radius: 2px; margin-right: 15px; background: #fff; flex-shrink: 0; }
-        #label { color: #555; font-size: 14px; flex-grow: 1; user-select: none; }
-   
-        #progress-wrapper { display: none; width: 100%; margin-top: 15px; }
-        #progress-bg { background: #eee; height: 12px; border-radius: 6px; width: 100%; overflow: hidden; }
+        #progress-wrapper { display: none; margin-top: 15px; width: 100%; }
+        #progress-bg { background: #eee; height: 12px; border-radius: 6px; overflow: hidden; }
         #progress-fill { background: #4285f4; height: 100%; width: 0%; transition: width 0.1s linear; }
         #status-text { font-size: 12px; color: #777; margin-top: 8px; font-style: italic; }
 
-        #rick-grid { display: none; flex-wrap: wrap; height: 100vh; width: 100vw; background: black; position: fixed; top: 0; left: 0; }
-        img { width: calc(100vw / 9); height: calc(100vh / 8); object-fit: cover; }
+        #pre-roll-vid, #rick-grid { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 1000; }
+        #rick-grid { flex-wrap: wrap; overflow: hidden; align-content: flex-start; }
+        .rick-gif { width: calc(100vw / 9); height: calc(100vh / 8); object-fit: cover; }
+    </video>
     </style>
 </head>
 <body>
 
-    <div id="captcha-container" onclick="startPrank()">
-        <div class="row" id="main-row">
-            <div id="checkbox"></div>
-            <div id="label">I'm not a robot</div>
-        </div>
+    <div id="captcha-container" onclick="showPuzzle()">
+        <div id="checkbox"></div>
+        <div id="label">I'm not a robot</div>
         
         <div id="progress-wrapper">
-            <div id="progress-bg">
-                <div id="progress-fill"></div>
-            </div>
+            <div id="progress-bg"><div id="progress-fill"></div></div>
             <p id="status-text">Initializing...</p>
         </div>
     </div>
 
-    <div id="rick-grid">
-        <script>
-            const gifUrl = "https://media1.tenor.com/m/x8v1oNUOmg4AAAAd/rickroll-roll.gif";
-            for (let i = 0; i < 72; i++) {
-                document.write(`<img src="${gifUrl}">`);
-            }
-        </script>
+    <div id="puzzle-box">
+        <div id="puzzle-header" style="background:#4285f4; color:white; padding:15px; margin:-10px -10px 10px -10px;">
+            <p style="margin:0; font-size:12px;">Select all squares with</p>
+            <p id="puzzle-term" style="margin:0; font-size:20px; font-weight:bold;">Traffic Lights</p>
+        </div>
+        <div class="puzzle-grid" id="grid-container"></div>
+        <div style="font-size: 11px; color: #777; float: left; margin-top: 10px;">
+            Verification <span id="current-puz">1</span> of 6
+        </div>
+        <button id="verify-btn" onclick="handleVerify()">VERIFY</button>
     </div>
+
+    <video id="pre-roll-vid">
+        <source src="202603151152.mp4" type="video/mp4">
+    </video>
+
+    <div id="rick-grid"></div>
 
     <audio id="rick-audio" loop>
         <source src="rickroll.mp3" type="audio/mpeg">
     </audio>
 
     <script>
+        let puzzleCount = 1;
         let prankStarted = false;
+        const terms = ["Traffic Lights", "Buses", "Bicycles", "Crosswalks", "Stairs", "Fire Hydrants"];
+        const gifUrl = "https://media1.tenor.com/m/x8v1oNUOmg4AAAAd/rickroll-roll.gif";
 
-        function startPrank() {
-            if (prankStarted) return; 
+        const grid = document.getElementById('rick-grid');
+        for (let i = 0; i < 72; i++) {
+            const img = document.createElement('img');
+            img.src = gifUrl;
+            img.className = 'rick-gif';
+            grid.appendChild(img);
+        }
+
+        function generateGrid() {
+            const container = document.getElementById('grid-container');
+            container.innerHTML = '';
+            for (let i = 0; i < 9; i++) {
+                const div = document.createElement('div');
+                div.className = 'puzzle-square';
+                div.style.backgroundColor = `rgb(${235 + Math.random()*15}, ${235 + Math.random()*15}, ${235 + Math.random()*15})`;
+                div.onclick = function() {
+                    this.style.outline = (this.style.outline === "") ? "4px solid #4285f4" : "";
+                    this.style.outlineOffset = "-4px";
+                };
+                container.appendChild(div);
+            }
+        }
+
+        function showPuzzle() {
+            if (prankStarted) return;
+            document.getElementById('puzzle-box').style.display = 'block';
+            generateGrid();
+        }
+
+        function handleVerify() {
+            if (puzzleCount < 6) {
+                puzzleCount++;
+                document.getElementById('current-puz').innerText = puzzleCount;
+                document.getElementById('puzzle-term').innerText = terms[puzzleCount - 1];
+                generateGrid();
+            } else {
+                startLoading();
+            }
+        }
+
+        function startLoading() {
             prankStarted = true;
-
+            document.getElementById('puzzle-box').style.display = 'none';
+            document.getElementById('progress-wrapper').style.display = 'block';
+            
             const checkbox = document.getElementById('checkbox');
-            const progressWrapper = document.getElementById('progress-wrapper');
-            const fill = document.getElementById('progress-fill');
-            const status = document.getElementById('status-text');
-
             checkbox.style.background = "url('https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Approve_icon.svg/480px-Approve_icon.svg.png') no-repeat center";
             checkbox.style.backgroundSize = "contain";
             checkbox.style.border = "none";
 
-            setTimeout(() => {
-                progressWrapper.style.display = "block";
-                
-                let percent = 0;
-                const interval = setInterval(() => {
-                    percent += 1;
-                    fill.style.width = percent + "%";
-                    status.innerText = "Verifying certification... " + percent + "%";
+            let percent = 0;
+            const fill = document.getElementById('progress-fill');
+            const status = document.getElementById('status-text');
 
-                    if (percent === 99) {
-                        clearInterval(interval);
-   
+            const interval = setInterval(() => {
+                percent++;
+                fill.style.width = percent + "%";
+                status.innerText = "Verifying certification... " + percent + "%";
+
+                if (percent === 99) {
+                    clearInterval(interval);
+                    runSequencer(status);
+                }
+            }, 40);
+        }
+
+        function runSequencer(status) {
+            setTimeout(() => {
+                status.style.color = "red";
+                status.innerText = "Verification failed! Sending to troubleshooting...";
+                
+                setTimeout(() => {
+                    status.style.color = "#777";
+                    status.innerText = "The site is eating a sandwich, please wait until it finishes...";
+                    
+                    setTimeout(() => {
+                        status.style.color = "green";
+                        status.innerText = "Getting someone to help you... Success!";
+                        
                         setTimeout(() => {
-                            status.style.color = "red";
-                            status.innerText = "Verification failed! Sending to troubleshooting...";
+                            status.innerText = "Connecting you with Rick Astley...";
                             
                             setTimeout(() => {
-                                status.style.color = "#777";
-                                status.innerText = "The site is eating a sandwich, please wait until it finishes...";
-                                
-                                setTimeout(() => {
-                                    status.style.color = "green";
-                                    status.innerText = "Getting someone to help you troubleshoot... Success!";
-                                    
-                                    setTimeout(() => {
-                                        status.innerText = "Connecting you with Rick Astley...";
-                                  
-                                        setTimeout(() => {
-                                            document.getElementById('captcha-container').style.display = 'none';
-                                            document.getElementById('rick-grid').style.display = 'flex';
-                                            document.getElementById('rick-audio').play();
-                                        }, 1500);
-                                    }, 9000);
-                                }, 9000);
-                            }, 9000);
-                        }, 9000);
-                    }
-                }, 30);
-            }, 500);
+                                const preRoll = document.getElementById('pre-roll-vid');
+                                document.getElementById('captcha-container').style.display = 'none';
+                                preRoll.style.display = 'block';
+                                preRoll.play().catch(() => {
+                                    triggerFinalRick();
+                                });
+
+                                preRoll.onended = triggerFinalRick;
+                            }, 1500);
+                        }, 1500);
+                    }, 3000); 
+                }, 2000);
+            }, 1000);
+        }
+
+        function triggerFinalRick() {
+            document.getElementById('pre-roll-vid').style.display = 'none';
+            document.getElementById('rick-grid').style.display = 'flex';
+            document.getElementById('rick-audio').play();
         }
     </script>
 </body>
