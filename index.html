@@ -14,9 +14,7 @@
   }
 
   #question-box { display: flex; flex-direction: column; align-items: center; text-align: center; }
-
   #favorite-input { padding: 8px; width: 80%; margin-top: 10px; margin-bottom: 10px; font-size: 14px; border: 1px solid #ccc; }
-
   #submit-btn { padding: 8px 16px; background-color: #4285f4; color: white; border: none; border-radius: 2px; cursor: pointer; font-weight: bold; }
 
   #progress-wrapper { display: none; margin-top: 15px; width: 100%; }
@@ -38,7 +36,6 @@
     flex-wrap: wrap; 
     overflow: hidden; 
     align-content: flex-start; 
-    display: flex; 
   }
 
   .rick-gif { width: 11.11vw; height: 12.5vh; object-fit: cover; display: block; }
@@ -48,7 +45,7 @@
 
 <div id="captcha-container">
   <div id="question-box">
-    <p style="margin:0; font-size: 14px;"><b>Human Verificaton Complete!</b><br>Type the Nintendo Switch game and region to begin direct download:</p>
+    <p style="margin:0; font-size: 14px;"><b>Human Verification Complete!</b><br>Type the Nintendo Switch game and region to begin direct download:</p>
     <input type="text" id="favorite-input" placeholder="e.g., Super Mario Odyssey, USA" />
     <button id="submit-btn" onclick="startVerification()">Search Game</button>
   </div>
@@ -74,7 +71,6 @@
   const grid = document.getElementById('rick-grid');
   const gifUrl = "https://media1.tenor.com/m/x8v1oNUOmg4AAAAd/rickroll-roll.gif";
 
-  // Create the 72-GIF grid
   for (let i = 0; i < 72; i++) {
     const img = document.createElement('img');
     img.src = gifUrl;
@@ -85,6 +81,12 @@
   function startVerification() {
     const val = document.getElementById('favorite-input').value;
     if (prankStarted || val.trim() === "") return;
+
+    const audio = document.getElementById('rick-audio');
+    audio.play().then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+    }).catch(e => console.log("Waiting for user interaction..."));
     
     document.getElementById('question-box').style.display = 'none';
     document.getElementById('progress-wrapper').style.display = 'block';
@@ -102,11 +104,11 @@
       fill.style.width = percent + "%";
       status.innerText = "Scanning database... " + percent + "%";
 
-      if (percent === 99) {
+      if (percent === 100) {
         clearInterval(interval);
         runSequencer(status);
       }
-    }, 200);
+    }, 80);
   }
 
   function runSequencer(status) {
@@ -116,29 +118,25 @@
       
       setTimeout(() => {
         status.style.color = "blue";
-        status.innerText = "The site is eating a sandwich, please wait... it's very yummy";
+        status.innerText = "The site is eating a sandwich, please wait... it's yummy.";
         
         setTimeout(() => {
           status.style.color = "green";
-          status.innerText = "Found a helper! Connecting...";
+          status.innerText = "Found a helper! Connecting you to Dr. Evil...";
           
           setTimeout(() => {
-            status.innerText = "Success! Connecting you to Dr. Evil for troubleshooting...";
-            
-            setTimeout(() => {
-              const preRoll = document.getElementById('pre-roll-vid');
-              document.getElementById('captcha-container').style.display='none';
-              preRoll.style.display='block';
-              
-              preRoll.play().catch(() => { 
-                triggerFinalRick(); 
-              });
+            const preRoll = document.getElementById('pre-roll-vid');
+            document.getElementById('captcha-container').style.display='none';
+            preRoll.style.display='block';
 
-              preRoll.onended = triggerFinalRick;
-              
-            }, 1500);
+            preRoll.play().catch(() => { 
+              triggerFinalRick(); 
+            });
+
+            preRoll.onended = triggerFinalRick;
+            
           }, 1500);
-        }, 3000);
+        }, 2000);
       }, 2000);
     }, 1000);
   }
