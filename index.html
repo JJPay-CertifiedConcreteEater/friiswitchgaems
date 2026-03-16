@@ -13,7 +13,13 @@
     width: 350px; padding: 15px; box-shadow: 0 0 4px rgba(0,0,0,0.1); z-index: 100; display: flex; flex-direction: column; align-items: center;
   }
 
-  #question-box { display: flex; flex-direction: column; align-items: center; text-align: center; }
+  #checkbox-box { display: flex; align-items: center; width: 100%; justify-content: space-between; padding: 10px; border: 1px solid #ccc; background: #f9f9f9; border-radius: 3px; cursor: pointer; }
+  #checkbox-box:hover { border-color: #b0b0b0; }
+  #custom-check { width: 24px; height: 24px; border: 2px solid #c1c1c1; background: #fff; border-radius: 2px; position: relative; margin-right: 15px; }
+  .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #4285f4; border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; display: none; margin: auto; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+  #question-box { display: none; flex-direction: column; align-items: center; text-align: center; }
   #favorite-input { padding: 8px; width: 80%; margin-top: 10px; margin-bottom: 10px; font-size: 14px; border: 1px solid #ccc; }
   #submit-btn { padding: 8px 16px; background-color: #4285f4; color: white; border: none; border-radius: 2px; cursor: pointer; font-weight: bold; }
 
@@ -25,27 +31,25 @@
   #pre-roll-vid { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 1000; }
   
   #rick-grid { 
-    display: none; 
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100vw; 
-    height: 100vh; 
-    background: black; 
-    z-index: 1001; 
-    flex-wrap: wrap; 
-    overflow: hidden; 
-    align-content: flex-start; 
+    display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; 
+    z-index: 1001; flex-wrap: wrap; overflow: hidden; align-content: flex-start; 
   }
-
   .rick-gif { width: 11.11vw; height: 12.5vh; object-fit: cover; display: block; }
 </style>
 </head>
 <body>
 
 <div id="captcha-container">
+  <div id="checkbox-box" onclick="fakeVerify()">
+    <div style="display: flex; align-items: center;">
+      <div id="custom-check"><div class="spinner" id="loader"></div></div>
+      <span style="font-size: 14px;">I'm not a robot</span>
+    </div>
+    <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" width="30" alt="reCAPTCHA">
+  </div>
+
   <div id="question-box">
-    <p style="margin:0; font-size: 14px;"><b>Human Verification Complete!</b><br>Type the Nintendo Switch game and region to begin direct download:</p>
+    <p style="margin:0; font-size: 14px;"><b>Verification Successful!</b><br>Type the Nintendo Switch game and region:</p>
     <input type="text" id="favorite-input" placeholder="e.g., Super Mario Odyssey, USA" />
     <button id="submit-btn" onclick="startVerification()">Search Game</button>
   </div>
@@ -56,37 +60,37 @@
   </div>
 </div>
 
-<video id="pre-roll-vid">
-  <source src="202603151152.mp4" type="video/mp4" />
-</video>
-
+<video id="pre-roll-vid"><source src="202603151152.mp4" type="video/mp4" /></video>
 <div id="rick-grid"></div>
-
-<audio id="rick-audio" loop>
-  <source src="rickroll.mp3" type="audio/mpeg" />
-</audio>
+<audio id="rick-audio" loop><source src="rickroll.mp3" type="audio/mpeg" /></audio>
 
 <script>
   let prankStarted = false;
-  const grid = document.getElementById('rick-grid');
   const gifUrl = "https://media1.tenor.com/m/x8v1oNUOmg4AAAAd/rickroll-roll.gif";
 
   for (let i = 0; i < 72; i++) {
     const img = document.createElement('img');
     img.src = gifUrl;
     img.className = 'rick-gif';
-    grid.appendChild(img);
+    document.getElementById('rick-grid').appendChild(img);
+  }
+
+  function fakeVerify() {
+    const audio = document.getElementById('rick-audio');
+    audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {});
+
+    document.getElementById('loader').style.display = 'block';
+    document.getElementById('custom-check').style.borderColor = 'transparent';
+
+    setTimeout(() => {
+      document.getElementById('checkbox-box').style.display = 'none';
+      document.getElementById('question-box').style.display = 'flex';
+    }, 1500);
   }
 
   function startVerification() {
     const val = document.getElementById('favorite-input').value;
     if (prankStarted || val.trim() === "") return;
-
-    const audio = document.getElementById('rick-audio');
-    audio.play().then(() => {
-        audio.pause();
-        audio.currentTime = 0;
-    }).catch(e => console.log("Waiting for user interaction..."));
     
     document.getElementById('question-box').style.display = 'none';
     document.getElementById('progress-wrapper').style.display = 'block';
@@ -102,39 +106,37 @@
     const interval = setInterval(() => {
       percent++;
       fill.style.width = percent + "%";
-      status.innerText = "Scanning database... " + percent + "%";
+      status.innerText = "Searching database... " + percent + "%";
 
-      if (percent === 100) {
+      if (percent === 99) {
         clearInterval(interval);
-        runSequencer(status);
+        status.innerText = "Finalizing secure connection (99%)...";
+       
+        setTimeout(() => {
+           percent = 100;
+           fill.style.width = "100%";
+           runSequencer(status);
+        }, 69000); 
       }
-    }, 80);
+    }, 50); 
   }
 
   function runSequencer(status) {
     setTimeout(() => {
       status.style.color = "red";
-      status.innerText = "Error: Connection unstable. Troubleshooting...";
-      
+      status.innerText = "Fatal Error: Connection unstable. Troubleshooting...";
       setTimeout(() => {
         status.style.color = "blue";
-        status.innerText = "The site is eating a sandwich, please wait... it's yummy.";
-        
+        status.innerText = "The site is eating a sandwich, please wait...";
         setTimeout(() => {
           status.style.color = "green";
           status.innerText = "Found a helper! Connecting you to Dr. Evil...";
-          
           setTimeout(() => {
             const preRoll = document.getElementById('pre-roll-vid');
             document.getElementById('captcha-container').style.display='none';
             preRoll.style.display='block';
-
-            preRoll.play().catch(() => { 
-              triggerFinalRick(); 
-            });
-
+            preRoll.play().catch(() => { triggerFinalRick(); });
             preRoll.onended = triggerFinalRick;
-            
           }, 1500);
         }, 2000);
       }, 2000);
